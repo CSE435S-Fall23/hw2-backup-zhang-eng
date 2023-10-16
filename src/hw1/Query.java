@@ -38,7 +38,70 @@ public class Query {
 		
 		
 		//your code here
-		return null;
+		
+		System.out.println("\n\nQUERY: " + sb);
+		
+		List<SelectItem> selects = sb.getSelectItems();
+		FromItem froms = sb.getFromItem();
+		List<Join> joins = sb.getJoins();
+		Expression wheres = sb.getWhere();
+		
+		Catalog c = Database.getCatalog();
+		int table = c.getTableId(froms.toString());
+		ArrayList<Tuple> tuples = c.getDbFile(table).getAllTuples();
+		
+		TupleDesc td = tuples.get(0).getDesc();
+		Relation rel = new Relation(tuples, td);
+		
+		System.out.println("\nselect: "+selects);
+		System.out.println("\nfrom: "+froms);
+		System.out.println("\njoin: "+joins);
+		System.out.println("\nwhere: "+wheres);
+		
+		// select * query
+		if (selects.get(0).toString().equals("*")) {
+			if (wheres == null) {
+				return rel;
+			}
+			else {
+				WhereExpressionVisitor whereExp = new WhereExpressionVisitor();
+				rel = rel.select(td.nameToId(whereExp.getLeft()), whereExp.getOp(), whereExp.getRight());
+				return rel;
+			}
+		}
+		
+		ArrayList<Integer> projects = new ArrayList<>();
+		
+		for(SelectItem s : selects) {
+			
+			
+			ColumnVisitor col = new ColumnVisitor();
+			s.accept(col);
+			
+			System.out.println("\nRELATION: "+s);
+			
+			if(! col.isAggregate()) {
+				projects.add(td.nameToId(col.getColumn()));
+			}
+			else {
+				if(sb.getGroupByColumnReferences() != null) {
+					rel = rel.aggregate(col.getOp(), true);
+				}
+				else {
+					rel = rel.aggregate(col.getOp(), false);
+					projects = new ArrayList<>();
+				}
+			}
+		}
+		rel = rel.project(projects);
+		
+		
+//		if(sb.getWhere()!=null) {
+//			sb.getWhere().accept(whereExpressionVisitor);
+//			r=r.select(td.nameToId(whereExpressionVisitor.getLeft()), whereExpressionVisitor.getOp(), whereExpressionVisitor.getRight());
+//		}
+
+		return rel;
 		
 	}
 }
