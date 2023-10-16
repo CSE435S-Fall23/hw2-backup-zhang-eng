@@ -15,13 +15,35 @@ import java.util.*;
  */
 
 public class Catalog {
+	class Table {
+		private HeapFile file;
+		private String pKey;
+		private int id;
+		
+		public Table(HeapFile file, int id) {
+			this.file = file;
+			this.pKey = null;
+			this.id = id;
+		}
+		
+		public Table(HeapFile file, String pKey, int id) {
+			this.file = file;
+			this.pKey = pKey;
+			this.id = id;
+		}
+	}
 	
+	// What are the table's contents
+	// Metadata: Table name, private key, id
+	private HashMap<String, Table> tableName;
+	private HashMap<Integer, String> tableId;
+
     /**
      * Constructor.
-     * Creates a new, empty catalog.
      */
     public Catalog() {
-    	//your code here
+    	tableName = new HashMap<String, Table>();
+    	tableId = new HashMap<Integer, String>();
     }
 
     /**
@@ -33,11 +55,13 @@ public class Catalog {
      * @param pkeyField the name of the primary key field
      */
     public void addTable(HeapFile file, String name, String pkeyField) {
-    	//your code here
+    	Table add = new Table(file, pkeyField, file.getId());
+    	tableName.put(name, add);
+    	tableId.put(file.getId(), name);
     }
 
     public void addTable(HeapFile file, String name) {
-        addTable(file,name,"");
+        addTable(file, name, "");
     }
 
     /**
@@ -45,8 +69,8 @@ public class Catalog {
      * @throws NoSuchElementException if the table doesn't exist
      */
     public int getTableId(String name) {
-    	//your code here
-    	return 0;
+    	Table metadata = tableName.get(name);
+    	return metadata.id;
     }
 
     /**
@@ -55,8 +79,8 @@ public class Catalog {
      *     function passed to addTable
      */
     public TupleDesc getTupleDesc(int tableid) throws NoSuchElementException {
-    	//your code here
-    	return null;
+    	String name = tableId.get(tableid);
+    	return tableName.get(name).file.getTupleDesc();
     }
 
     /**
@@ -66,28 +90,28 @@ public class Catalog {
      *     function passed to addTable
      */
     public HeapFile getDbFile(int tableid) throws NoSuchElementException {
-    	//your code here
-    	return null;
+    	String name = tableId.get(tableid);
+    	return tableName.get(name).file;
     }
 
     /** Delete all tables from the catalog */
     public void clear() {
-    	//your code here
+    	tableName.clear();
+    	tableId.clear();
     }
 
     public String getPrimaryKey(int tableid) {
-    	//your code here
-    	return null;
+    	String name = tableId.get(tableid);
+    	return tableName.get(name).pKey;
     }
 
     public Iterator<Integer> tableIdIterator() {
     	//your code here
-    	return null;
+    	return (Iterator) tableId.entrySet().iterator();
     }
 
     public String getTableName(int id) {
-    	//your code here
-    	return null;
+    	return tableId.get(id);
     }
     
     /**
@@ -134,6 +158,14 @@ public class Catalog {
                 HeapFile tabHf = new HeapFile(new File("testfiles/" + name + ".dat"), t);
                 addTable(tabHf,name,primaryKey);
                 System.out.println("Added table : " + name + " with schema " + t);
+                
+                for (String key : tableName.keySet()) {
+                    System.out.println(key);
+                }
+                
+                for(Integer key : tableId.keySet()) {
+                	System.out.print(key);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

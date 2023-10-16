@@ -1,6 +1,7 @@
 package hw1;
 
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -10,18 +11,25 @@ import java.util.HashMap;
  *
  */
 public class Tuple {
+	private TupleDesc t;
+	private Field[] values;
+	private int pid;
+	private int id;
+	
 	
 	/**
 	 * Creates a new tuple with the given description
 	 * @param t the schema for this tuple
 	 */
 	public Tuple(TupleDesc t) {
-		//your code here
+		this.t = t;
+		values = new Field[t.numFields()];
+		pid = 0;
+		id = 0;
 	}
-	
+
 	public TupleDesc getDesc() {
-		//your code here
-		return null;
+		return t;
 	}
 	
 	/**
@@ -29,12 +37,11 @@ public class Tuple {
 	 * @return the page id of this tuple
 	 */
 	public int getPid() {
-		//your code here
-		return 0;
+		return this.pid;
 	}
 
 	public void setPid(int pid) {
-		//your code here
+		this.pid = pid;
 	}
 
 	/**
@@ -42,16 +49,15 @@ public class Tuple {
 	 * @return the slot where this tuple is stored
 	 */
 	public int getId() {
-		//your code here
-		return 0;
+		return this.id;
 	}
 
 	public void setId(int id) {
-		//your code here
+		this.id = id;
 	}
 	
 	public void setDesc(TupleDesc td) {
-		//your code here;
+		t = td;
 	}
 	
 	/**
@@ -60,12 +66,12 @@ public class Tuple {
 	 * @param v the data
 	 */
 	public void setField(int i, Field v) {
-		//your code here
+		System.out.print(this);
+		values[i] = v;
 	}
 	
 	public Field getField(int i) {
-		//your code here
-		return null;
+		return values[i];
 	}
 	
 	/**
@@ -74,8 +80,11 @@ public class Tuple {
 	 * the String columns to readable text).
 	 */
 	public String toString() {
-		//your code here
-		return "";
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < values.length; i++) {
+			sb.append(t.getFieldName(i)).append(": ").append(values[i]);
+		}
+		return sb.toString();
 	}
 }
 	
