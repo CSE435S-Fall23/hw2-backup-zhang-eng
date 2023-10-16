@@ -81,6 +81,7 @@ public class Query {
 			// deal with where
 			if (! noWheres) {
 				WhereExpressionVisitor whereExp = new WhereExpressionVisitor();
+				wheres.accept(whereExp);
 				rel = rel.select(td.nameToId(whereExp.getLeft()), whereExp.getOp(), whereExp.getRight());
 			}
 			return rel;
@@ -101,11 +102,11 @@ public class Query {
 				TupleDesc td2 = tuples2.get(0).getDesc();
 				Relation r2 = new Relation(tuples2, td2);
 				
-				System.out.println(j.getOnExpression());
+//				System.out.println(j.getOnExpression());
 			}
 		}
-		System.out.println("\n!!RELATION: "+rel);
-		System.out.println("\n!!PROJECTS: "+results);
+//		System.out.println("\n!!RELATION: "+rel);
+//		System.out.println("\n!!PROJECTS: "+results);
 
 		// go through select items
 		for (SelectItem s : selects) {
