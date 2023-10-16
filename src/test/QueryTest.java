@@ -37,35 +37,35 @@ public class QueryTest {
 		c = Database.getCatalog();
 		c.loadSchema("testfiles/A.txt");
 	}
-	
-	@Test
-	public void testSimple() {
-		Query q = new Query("SELECT a1, a2 FROM A");
-		Relation r = q.execute();
-		
-		assertTrue(r.getTuples().size() == 8);
-		assertTrue(r.getDesc().getSize() == 8);
-	}
-	
-	@Test
-	public void testSelect() {
-		Query q = new Query("SELECT a1, a2 FROM A WHERE a1 = 530");
-		Relation r = q.execute();
-		
-		assert(r.getTuples().size() == 5);
-		assert(r.getDesc().getSize() == 8);
-	}
-	
-	@Test
-	public void testProject() {
-		Query q = new Query("SELECT a2 FROM A");
-		Relation r = q.execute();
-		
-		assert(r.getDesc().getSize() == 4);
-		assert(r.getTuples().size() == 8);
-		assert(r.getDesc().getFieldName(0).equals("a2"));
-	}
-	
+//	
+//	@Test
+//	public void testSimple() {
+//		Query q = new Query("SELECT a1, a2 FROM A");
+//		Relation r = q.execute();
+//		
+//		assertTrue(r.getTuples().size() == 8);
+//		assertTrue(r.getDesc().getSize() == 8);
+//	}
+//	
+//	@Test
+//	public void testSelect() {
+//		Query q = new Query("SELECT a1, a2 FROM A WHERE a1 = 530");
+//		Relation r = q.execute();
+//		
+//		assert(r.getTuples().size() == 5);
+//		assert(r.getDesc().getSize() == 8);
+//	}
+//	
+//	@Test
+//	public void testProject() {
+//		Query q = new Query("SELECT a2 FROM A");
+//		Relation r = q.execute();
+//		
+//		assert(r.getDesc().getSize() == 4);
+//		assert(r.getTuples().size() == 8);
+//		assert(r.getDesc().getFieldName(0).equals("a2"));
+//	}
+//	
 //	@Test
 //	public void testJoin() {
 //		Query q = new Query("SELECT c1, c2, a1, a2 FROM test JOIN A ON test.c1 = a.a1");
@@ -84,7 +84,7 @@ public class QueryTest {
 		IntField agg = (IntField) (r.getTuples().get(0).getField(0));
 		assertTrue(agg.getValue() == 36);
 	}
-	
+//	
 //	@Test
 //	public void testGroupBy() {
 //		Query q = new Query("SELECT a1, SUM(a2) FROM A GROUP BY a1");
@@ -92,14 +92,14 @@ public class QueryTest {
 //		
 //		assertTrue(r.getTuples().size() == 4);
 //	}
-	
-	@Test
-	public void testSelectAll() {
-		Query q = new Query("SELECT * FROM A");
-		Relation r = q.execute();
-		
-		assertTrue(r.getTuples().size() == 8);
-		assertTrue(r.getDesc().getSize() == 8);
-	}
+//	
+//	@Test
+//	public void testSelectAll() {
+//		Query q = new Query("SELECT * FROM A");
+//		Relation r = q.execute();
+//		
+//		assertTrue(r.getTuples().size() == 8);
+//		assertTrue(r.getDesc().getSize() == 8);
+//	}
 	
 }

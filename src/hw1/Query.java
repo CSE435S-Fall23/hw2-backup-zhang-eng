@@ -41,69 +41,106 @@ public class Query {
 		
 		System.out.println("\n\nQUERY: " + sb);
 		
+		// parse all fields
 		List<SelectItem> selects = sb.getSelectItems();
 		FromItem froms = sb.getFromItem();
 		List<Join> joins = sb.getJoins();
 		Expression wheres = sb.getWhere();
+		List<Expression> groups = sb.getGroupByColumnReferences();
 		
+		boolean noJoins, noWheres, noGroups;
+		if (joins == null) {
+			noJoins = true;
+		}
+		else {
+			noJoins = false;
+		}
+		if (wheres == null) {
+			noWheres = true;
+		}
+		else {
+			noWheres = false;
+		}
+		if (groups == null) {
+			noGroups = true;
+		}
+		else {
+			noGroups = false;
+		}
+		
+		// initialize relation
 		Catalog c = Database.getCatalog();
 		int table = c.getTableId(froms.toString());
 		ArrayList<Tuple> tuples = c.getDbFile(table).getAllTuples();
-		
 		TupleDesc td = tuples.get(0).getDesc();
 		Relation rel = new Relation(tuples, td);
-		
-		System.out.println("\nselect: "+selects);
-		System.out.println("\nfrom: "+froms);
-		System.out.println("\njoin: "+joins);
-		System.out.println("\nwhere: "+wheres);
+		ArrayList<Integer> results = new ArrayList<>();
 		
 		// select * query
 		if (selects.get(0).toString().equals("*")) {
-			if (wheres == null) {
-				return rel;
-			}
-			else {
+			// deal with where
+			if (! noWheres) {
 				WhereExpressionVisitor whereExp = new WhereExpressionVisitor();
 				rel = rel.select(td.nameToId(whereExp.getLeft()), whereExp.getOp(), whereExp.getRight());
-				return rel;
 			}
+			return rel;
 		}
 		
-		ArrayList<Integer> projects = new ArrayList<>();
-		
-		for(SelectItem s : selects) {
-			
-			
+		// deal with joins
+		if (! noJoins) {
+			// execute join
+			for (Join j : joins) {
+				
+				System.out.println("\nJOIN: "+j);
+				
+				// get fields from 2nd
+				FromItem from2 = j.getRightItem();
+				Catalog c2 = Database.getCatalog();
+				int table2 = c2.getTableId(from2.toString());
+				ArrayList<Tuple> tuples2 = c2.getDbFile(table2).getAllTuples();
+				TupleDesc td2 = tuples2.get(0).getDesc();
+				Relation r2 = new Relation(tuples2, td2);
+				
+				System.out.println(j.getOnExpression());
+			}
+		}
+		System.out.println("\n!!RELATION: "+rel);
+		System.out.println("\n!!PROJECTS: "+results);
+
+		// go through select items
+		for (SelectItem s : selects) {
 			ColumnVisitor col = new ColumnVisitor();
 			s.accept(col);
 			
+			// deal with aggregate
 			if (col.isAggregate()) {
-				// fix!
-				System.out.println("\n!!RELATION: "+s);
-
-				if(sb.getGroupByColumnReferences() != null) {
-					rel = rel.aggregate(col.getOp(), true);
+				AggregateOperator operator = col.getOp();
+				
+				if (noGroups) {
+					rel = rel.aggregate(operator, false);
+					results = new ArrayList<>();
 				}
-				else {
-					rel = rel.aggregate(col.getOp(), false);
-					projects = new ArrayList<>();
+				else { // deal with groups
+					rel = rel.aggregate(operator, true);
 				}
 			}
 			else {
-				projects.add(td.nameToId(col.getColumn()));
+				results.add(td.nameToId(col.getColumn()));
 			}
 		}
 		
-		rel = rel.project(projects);
+		System.out.println("\n!!RELATION: "+rel);
+		System.out.println("\n!!PROJECTS: "+results);
+
+		rel = rel.project(results);
 		
-		
-		if(wheres != null) {
+		// deal with wheres
+		if (! noWheres) {
 			WhereExpressionVisitor whereExp = new WhereExpressionVisitor();
 			wheres.accept(whereExp);
 			rel = rel.select(td.nameToId(whereExp.getLeft()), whereExp.getOp(), whereExp.getRight());
 		}
-
+		
 		return rel;
 		
 	}
