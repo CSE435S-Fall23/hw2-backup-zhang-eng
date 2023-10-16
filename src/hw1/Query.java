@@ -78,12 +78,10 @@ public class Query {
 			ColumnVisitor col = new ColumnVisitor();
 			s.accept(col);
 			
-			System.out.println("\nRELATION: "+s);
-			
-			if(! col.isAggregate()) {
-				projects.add(td.nameToId(col.getColumn()));
-			}
-			else {
+			if (col.isAggregate()) {
+				// fix!
+				System.out.println("\n!!RELATION: "+s);
+
 				if(sb.getGroupByColumnReferences() != null) {
 					rel = rel.aggregate(col.getOp(), true);
 				}
@@ -92,14 +90,19 @@ public class Query {
 					projects = new ArrayList<>();
 				}
 			}
+			else {
+				projects.add(td.nameToId(col.getColumn()));
+			}
 		}
+		
 		rel = rel.project(projects);
 		
 		
-//		if(sb.getWhere()!=null) {
-//			sb.getWhere().accept(whereExpressionVisitor);
-//			r=r.select(td.nameToId(whereExpressionVisitor.getLeft()), whereExpressionVisitor.getOp(), whereExpressionVisitor.getRight());
-//		}
+		if(wheres != null) {
+			WhereExpressionVisitor whereExp = new WhereExpressionVisitor();
+			wheres.accept(whereExp);
+			rel = rel.select(td.nameToId(whereExp.getLeft()), whereExp.getOp(), whereExp.getRight());
+		}
 
 		return rel;
 		

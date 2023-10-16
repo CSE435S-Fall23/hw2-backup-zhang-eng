@@ -74,17 +74,17 @@ public class QueryTest {
 //		assert(r.getTuples().size() == 5);
 //		assert(r.getDesc().getSize() == 141);
 //	}
-//	
-//	@Test
-//	public void testAggregate() {
-//		Query q = new Query("SELECT SUM(a2) FROM A");
-//		Relation r = q.execute();
-//		
-//		assertTrue(r.getTuples().size() == 1);
-//		IntField agg = (IntField) (r.getTuples().get(0).getField(0));
-//		assertTrue(agg.getValue() == 36);
-//	}
-//	
+	
+	@Test
+	public void testAggregate() {
+		Query q = new Query("SELECT SUM(a2) FROM A");
+		Relation r = q.execute();
+		
+		assertTrue(r.getTuples().size() == 1);
+		IntField agg = (IntField) (r.getTuples().get(0).getField(0));
+		assertTrue(agg.getValue() == 36);
+	}
+	
 //	@Test
 //	public void testGroupBy() {
 //		Query q = new Query("SELECT a1, SUM(a2) FROM A GROUP BY a1");
