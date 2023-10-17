@@ -56,5 +56,15 @@ public class YourUnitTests {
 		assertTrue(r.getTuples().size() == 1);
 		assertTrue(r.getDesc().getSize() == 133);
 	}
+	
+	@Test
+	public void testDifferentAggregateFunctions() {
+		Query q = new Query("SELECT MAX(c1), SUM(c2) FROM test");
+		Relation r = q.execute();
+		
+		assertTrue(r.getTuples().size() == 1);
+		IntField agg = (IntField) (r.getTuples().get(0).getField(0));
+		assertTrue(agg.getValue() == 36);
+	}
 
 }
