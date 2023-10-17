@@ -1,3 +1,4 @@
+
 package hw1;
 
 import java.util.ArrayList;
@@ -34,7 +35,6 @@ public class Relation {
 			}
 		}
 		
-//		this.tuples = selectedValues;
 		return new Relation(selectedValues, this.td);
 	}
 	
@@ -60,7 +60,6 @@ public class Relation {
 			copyFields[curField] = curName;
 		}
 		
-//		this.td =  new TupleDesc(copyTypes, copyFields);
 		return new Relation(this.tuples, new TupleDesc(copyTypes, copyFields));
 		
 	}
@@ -97,9 +96,6 @@ public class Relation {
 			
 		}
 		
-//		this.td = keptDesc;
-//		this.tuples = keptTuples;
-		
 		return new Relation(keptTuples, keptDesc);
 	}
 	
@@ -116,17 +112,48 @@ public class Relation {
 		//Figure out which values in field1 and field2 are the same, keep these tuples
 		//Create new TupleDesc with combined types + fields
 		//Create new tuple list where null value for other relation's fields
+		int thisNum = this.td.numFields();
+		int otherNum = other.getDesc().numFields();
 		
-		int i = 0;
-		ArrayList<Tuple> relation1 = new ArrayList<Tuple>();
-		ArrayList<Tuple> relation2 = new ArrayList<Tuple>();
-//		while(i < this.tuples.size() && i < other.getTuples().size()) {
-//			if(this.tuples.get(i).get)
-//			
-//			i++;
-//		}
+		int joinedNum = thisNum + otherNum;
+		Type[] joinedTypes = new Type[joinedNum];
+		String[] joinedFields = new String[joinedNum];
 		
+		for(int j = 0; j < joinedNum; j++) {
+			if(j < this.td.numFields()) {
+				joinedTypes[j] = this.td.getType(j);
+				joinedFields[j] = this.td.getFieldName(j);
+			}
+			else {
+				joinedTypes[j] = other.getDesc().getType(j - thisNum);
+				joinedFields[j] = other.getDesc().getFieldName(j - thisNum);
+			}
+		}
 		
+		TupleDesc joinedDesc = new TupleDesc(joinedTypes, joinedFields);
+		ArrayList<Tuple> joinedValues = new ArrayList<>();
+		
+		for(int i = 0; i < this.tuples.size(); i++) {
+			Tuple thisValue = this.tuples.get(i);
+			for(int j = 0; j < other.getTuples().size(); j++) {
+				Tuple otherValue = other.getTuples().get(j);
+				if(thisValue.getField(field1).compare(RelationalOperator.EQ, otherValue.getField(field2))) {
+					Tuple joinedValue = new Tuple(joinedDesc);
+					for(int k = 0; k < joinedNum; k++) {
+						if(k < this.td.numFields()) {
+							joinedValue.setField(k, thisValue.getField(k));
+						}
+						else {
+							joinedValue.setField(k, otherValue.getField(k - thisNum));
+						}
+					}
+					
+					joinedValues.add(joinedValue);
+				}
+			}
+		}
+		
+		return new Relation(joinedValues, joinedDesc);
 	}
 	
 	/**
@@ -136,8 +163,15 @@ public class Relation {
 	 * @return
 	 */
 	public Relation aggregate(AggregateOperator op, boolean groupBy) {
-		//your code here
-		return null;
+		Aggregator ag = new Aggregator(op, groupBy, this.td);
+		for(int i = 0; i < this.tuples.size(); i++) {
+			ag.merge(this.tuples.get(i));
+			System.out.println("CurIndex: " + i);
+		}
+		
+		ArrayList<Tuple> res = ag.getResults();
+
+		return new Relation(res, this.td);
 	}
 	
 	public TupleDesc getDesc() {
@@ -161,7 +195,14 @@ public class Relation {
 	 * first contain the TupleDesc, followed by each of the tuples in this relation
 	 */
 	public String toString() {
-		//your code here
-		return null;
+		String descString = td.toString();
+		String tupleString = tuples.toString();
+		
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(descString);
+		sb.append(tupleString);
+		
+		return sb.toString();
 	}
 }
