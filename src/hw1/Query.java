@@ -76,7 +76,7 @@ public class Query {
 		Relation rel = new Relation(tuples, td);
 		ArrayList<Integer> results = new ArrayList<>();
 		
-		// select * query
+		// deal with select * query
 		if (selects.get(0).toString().equals("*")) {
 			// deal with where
 			if (! noWheres) {
@@ -101,8 +101,45 @@ public class Query {
 				ArrayList<Tuple> tuples2 = c2.getDbFile(table2).getAllTuples();
 				TupleDesc td2 = tuples2.get(0).getDesc();
 				Relation r2 = new Relation(tuples2, td2);
+				int field1 = 0;
+				int field2 = 0;
 				
-//				System.out.println(j.getOnExpression());
+				String myS[] = j.getOnExpression().toString().split(" = ");
+				String myS2[] = myS[0].split("\\.");
+				String myS3[] = myS[1].split("\\.");
+				
+				if (c.getTableId(myS2[0].trim()) != table) {
+					for (int i = 0; i < td2.numFields(); i++) {
+						String name = td2.getFieldName(i);
+						if(name.equals(myS2[1].trim())) {
+							field2 = i;
+						}
+					}
+					
+					for (int i = 0; i < td.numFields(); i++) {
+						String name = td.getFieldName(i);
+						if(name.equals(myS3[1].trim())) {
+							field1 = i;
+						}
+					}
+				}
+				else {
+					for (int i = 0; i < td.numFields(); i++) {
+						String name = td.getFieldName(i);
+						if (name.equalsIgnoreCase(myS2[1].trim())) {
+							field1 = i;
+						}
+					}
+					
+					for (int i = 0; i < td2.numFields(); i++) {
+						String name = td2.getFieldName(i);
+						if(name.equalsIgnoreCase(myS3[1].trim())) {
+							field2 = i;
+						}
+					}
+				}
+				rel = rel.join(r2, field1, field2);
+				
 			}
 		}
 //		System.out.println("\n!!RELATION: "+rel);
@@ -143,6 +180,5 @@ public class Query {
 		}
 		
 		return rel;
-		
 	}
 }
