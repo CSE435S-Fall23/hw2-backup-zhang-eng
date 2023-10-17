@@ -159,8 +159,11 @@ public class Query {
 				AggregateOperator operator = col.getOp();
 				
 				if (noGroups) {
+					// get aggregate value from relation
 					rel = rel.aggregate(operator, false);
-					results = new ArrayList<>();
+					results.add(td.nameToId(col.getColumn()));
+
+					break;
 				}
 				else { // deal with groups
 					rel = rel.aggregate(operator, true);
@@ -172,6 +175,9 @@ public class Query {
 		}
 		
 		rel = rel.project(results);
+
+		System.out.println(rel);
+		System.out.println("!!");
 		
 		// deal with wheres
 		if (! noWheres) {

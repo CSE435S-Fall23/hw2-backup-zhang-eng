@@ -6,12 +6,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import hw1.AggregateOperator;
 import hw1.Catalog;
 import hw1.Database;
 import hw1.HeapFile;
@@ -30,6 +32,8 @@ public class YourUnitTests {
 	private TupleDesc td;
 	private Catalog c;
 	private HeapPage hp;
+	private HeapFile ahf;
+	private TupleDesc atd;
 
 	@Before
 	public void setup() {
@@ -46,6 +50,10 @@ public class YourUnitTests {
 		
 		c = Database.getCatalog();
 		c.loadSchema("testfiles/A.txt");
+
+		int tableId = c.getTableId("A");
+		atd = c.getTupleDesc(tableId);
+		ahf = c.getDbFile(tableId);
 	}
 	
 	@Test
@@ -57,14 +65,28 @@ public class YourUnitTests {
 		assertTrue(r.getDesc().getSize() == 133);
 	}
 	
+//	@Test
+//	public void testDifferentAggregateFunctions() {
+//		Query q = new Query("SELECT MAX(c1), SUM(c2) FROM test");
+//		Relation r = q.execute();
+//		
+//		assertTrue(r.getTuples().size() == 1);
+//		IntField agg = (IntField) (r.getTuples().get(0).getField(0));
+//		assertTrue(agg.getValue() == 36);
+//	}
+	
 	@Test
-	public void testDifferentAggregateFunctions() {
-		Query q = new Query("SELECT MAX(c1), SUM(c2) FROM test");
-		Relation r = q.execute();
+	public void testRelationDifferentAggregateFunction() {
+		Relation ar = new Relation(ahf.getAllTuples(), atd);
+		ArrayList<Integer> c = new ArrayList<Integer>();
+		c.add(1);
+		ar = ar.project(c);
+		ar = ar.aggregate(AggregateOperator.MAX, false);
 		
-		assertTrue(r.getTuples().size() == 1);
-		IntField agg = (IntField) (r.getTuples().get(0).getField(0));
-		assertTrue(agg.getValue() == 36);
+		
+		assertTrue(ar.getTuples().size() == 1);
+		IntField agg = (IntField)(ar.getTuples().get(0).getField(0));
+		assertTrue(agg.getValue() == 8);
 	}
 
 }
