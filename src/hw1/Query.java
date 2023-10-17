@@ -48,6 +48,7 @@ public class Query {
 		Expression wheres = sb.getWhere();
 		List<Expression> groups = sb.getGroupByColumnReferences();
 		
+		// bools to keep track of what the query has
 		boolean noJoins, noWheres, noGroups;
 		if (joins == null) {
 			noJoins = true;
@@ -104,46 +105,49 @@ public class Query {
 				int field1 = 0;
 				int field2 = 0;
 				
-				String myS[] = j.getOnExpression().toString().split(" = ");
-				String myS2[] = myS[0].split("\\.");
-				String myS3[] = myS[1].split("\\.");
+				String[] joinStr = j.getOnExpression().toString().split(" = ");
+				String[] s1 = joinStr[0].split("\\.");
+				String[] s2 = joinStr[1].split("\\.");
 				
-				if (c.getTableId(myS2[0].trim()) != table) {
+				if (c.getTableId(s1[0].trim()) != table) {
+					// td2 and s1
 					for (int i = 0; i < td2.numFields(); i++) {
 						String name = td2.getFieldName(i);
-						if(name.equals(myS2[1].trim())) {
+						if(name.equals(s1[1].trim())) {
 							field2 = i;
 						}
 					}
 					
+					// td and s2
 					for (int i = 0; i < td.numFields(); i++) {
 						String name = td.getFieldName(i);
-						if(name.equals(myS3[1].trim())) {
+						if(name.equals(s2[1].trim())) {
 							field1 = i;
 						}
 					}
 				}
 				else {
+					// td and s1
 					for (int i = 0; i < td.numFields(); i++) {
 						String name = td.getFieldName(i);
-						if (name.equalsIgnoreCase(myS2[1].trim())) {
+						if (name.equalsIgnoreCase(s1[1].trim())) {
 							field1 = i;
 						}
 					}
 					
+					// td2 and s2
 					for (int i = 0; i < td2.numFields(); i++) {
 						String name = td2.getFieldName(i);
-						if(name.equalsIgnoreCase(myS3[1].trim())) {
+						if(name.equalsIgnoreCase(s2[1].trim())) {
 							field2 = i;
 						}
 					}
 				}
+				
 				rel = rel.join(r2, field1, field2);
 				
 			}
 		}
-//		System.out.println("\n!!RELATION: "+rel);
-//		System.out.println("\n!!PROJECTS: "+results);
 
 		// go through select items
 		for (SelectItem s : selects) {
@@ -167,9 +171,6 @@ public class Query {
 			}
 		}
 		
-		System.out.println("\n!!RELATION: "+rel);
-		System.out.println("\n!!PROJECTS: "+results);
-
 		rel = rel.project(results);
 		
 		// deal with wheres
