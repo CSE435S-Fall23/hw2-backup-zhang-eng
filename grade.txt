@@ -1,0 +1,8 @@
+Relation: 55/55
+Aggregate: 10/10
+Query: 20/30
+	Join failed. No AS
+	
+Unit Tests: 5/5
+
+90/100 
